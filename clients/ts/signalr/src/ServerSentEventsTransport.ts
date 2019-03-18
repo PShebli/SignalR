@@ -66,7 +66,7 @@ export class ServerSentEventsTransport implements ITransport {
             }
 
             try {
-                eventSource.onmessage = (e: MessageEvent) => {
+                eventSource.addEventListener("message", (e: any) => {
                     if (this.onreceive) {
                         try {
                             this.logger.log(LogLevel.Trace, `(SSE transport) data received. ${getDataDetail(e.data, this.logMessageContent)}.`);
@@ -76,23 +76,23 @@ export class ServerSentEventsTransport implements ITransport {
                             return;
                         }
                     }
-                };
+                });
 
-                eventSource.onerror = (e: MessageEvent) => {
+                eventSource.addEventListener("error", (e: any) => {
                     const error = new Error(e.data || "Error occurred");
                     if (opened) {
                         this.close(error);
                     } else {
                         reject(error);
                     }
-                };
+                });
 
-                eventSource.onopen = () => {
+                eventSource.addEventListener("open", () => {
                     this.logger.log(LogLevel.Information, `SSE connected to ${this.url}`);
                     this.eventSource = eventSource;
                     opened = true;
                     resolve();
-                };
+                });
             } catch (e) {
                 reject(e);
                 return;
